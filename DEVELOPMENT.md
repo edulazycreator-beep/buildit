@@ -56,6 +56,6 @@ ARCHITECTURE.md  ROADMAP.md  DEVELOPMENT.md
 Visual Designer, Logic editor (Blockly), Components/Resources editors, code generation, Code editor, AI Assistant / Builder / Visual Generator / Debugger, Build Manager, undo/redo for edits.
 
 ### Known gaps in Phase 1
-* `:app` not yet compiled (no Android SDK in the authoring environment) — see `docs/SPEC.md` §1.
+* `:app` is compiled and tested in GitHub Actions (`.github/workflows/android.yml`); the debug APK is a downloadable workflow artifact.
 * No Compose UI tests yet.
 * Launcher icon is a placeholder vector.

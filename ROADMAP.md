@@ -5,7 +5,7 @@ Status legend: ✅ done & verified · 🟡 done, verification pending · ⬜ not
 | Phase | Scope | Status |
 |---|---|---|
 | 0 | Environment inspection, architecture, spec, data contracts, risks, testing strategy | ✅ |
-| 1 | Android foundation, module structure, navigation, dashboard, project manager | 🟡 core verified (32 tests); `:app` awaiting first compile on a machine with the Android SDK |
+| 1 | Android foundation, module structure, navigation, dashboard, project manager | 🟡 builds in CI (tests green, debug APK produced); manual device pass pending |
 | 2 | Project model expansion (edit commands, undo/redo, variables, resources), sample projects, file management | ⬜ (schema v1, codec, migrations and storage already landed in Phase 1) |
 | 3 | Visual Designer, component hierarchy, properties inspector, XML generator | ⬜ |
 | 4 | Blockly integration, block registry, workspace ↔ model sync | ⬜ |
@@ -24,7 +24,7 @@ Status legend: ✅ done & verified · 🟡 done, verification pending · ⬜ not
 - [x] Core tests green (32)
 - [x] `:app` — Hilt, Compose M3 theme (light/dark/dynamic), type-safe navigation
 - [x] Dashboard, Project Manager, Create Project, Workspace shell (overview/settings/history), Settings
-- [ ] `./gradlew build` passes with the Android SDK (lint, unit tests, assembleDebug)
+- [x] CI (GitHub Actions): core + app unit tests and `assembleDebug` pass
 - [ ] Manual device pass: create → open → edit settings → restore history → rename → duplicate → export → import → delete
 - [ ] Compose UI test for the create/open flow
 
