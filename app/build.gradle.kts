@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.sketchwareai.app"
+    namespace = "com.buildit.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.sketchwareai.app"
+        applicationId = "com.buildit.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

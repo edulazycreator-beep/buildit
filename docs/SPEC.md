@@ -1,4 +1,4 @@
-# Sketchware AI — Technical Specification
+# Build It — Technical Specification
 
 Scope: the pre-implementation deliverables required by the master prompt (§21): environment inspection, data contracts, engineering risks and testing strategy. Architecture is in [`ARCHITECTURE.md`](../ARCHITECTURE.md); phases are in [`ROADMAP.md`](../ROADMAP.md).
 
@@ -61,9 +61,9 @@ Scope: the pre-implementation deliverables required by the master prompt (§21):
 
 Rules: object keys inside `properties`, `fields`, `inputs` are emitted sorted; unknown enum values and missing required fields are format errors; a document with `schemaVersion` greater than the app's is refused.
 
-### 3.2 Export archive (`.swai`, format 1)
+### 3.2 Export archive (`.buildit`, format 1)
 
-Zip containing `sketchware-ai-export.json` (`{"format":1,"schemaVersion":N,"exportedAt":ms}`), `project.json`, and user files (`src/**`, `res/**`, …). Excludes `history/` and `state.json`. Limits on import: 5 000 entries, 64 MiB per entry, 256 MiB total; any absolute, `..`, backslash, drive-letter or duplicate path rejects the whole archive.
+Zip containing `buildit-export.json` (`{"format":1,"schemaVersion":N,"exportedAt":ms}`), `project.json`, and user files (`src/**`, `res/**`, …). Excludes `history/` and `state.json`. Limits on import: 5 000 entries, 64 MiB per entry, 256 MiB total; any absolute, `..`, backslash, drive-letter or duplicate path rejects the whole archive.
 
 ### 3.3 Contracts defined in later phases (shape fixed now, details in-phase)
 
@@ -80,7 +80,7 @@ Zip containing `sketchware-ai-export.json` (`{"format":1,"schemaVersion":N,"expo
 
 | # | Risk | Impact | Mitigation |
 |---|---|---|---|
-| 1 | **Naming/trademark**: "Sketchware" is an existing product name. | Store rejection or legal notice. | Confirm rights before any public release; the codebase uses the name only in strings/package and can be renamed cheaply. |
+| 1 | **Naming/trademark**: the product was renamed from "Sketchware AI" to **Build It** (package `com.buildit`). Sketchware is used only as a UX reference; no Sketchware code is used. | — | Resolved. |
 | 2 | On-device APK compilation is hard (aapt2, d8, signing on ARM, storage). | No offline builds. | Remote worker first (as specified); `BuildService` interface keeps on-device builds pluggable. |
 | 3 | Remote builds execute user-supplied code (Gradle, Java). | Worker compromise, abuse, cost. | Ephemeral containers, no network except a pinned Maven mirror, CPU/memory/time limits, no secrets in the worker, per-user quotas, artifact hashing. |
 | 4 | Uploading source to a server. | Privacy expectations. | Explicit consent at first build, TLS, delete sources after build, documented retention. |
@@ -100,7 +100,7 @@ Zip containing `sketchware-ai-export.json` (`{"format":1,"schemaVersion":N,"expo
 | Core unit tests | JUnit 4 on JVM | `./gradlew :core:model:test :core:storage:test`, or `tools/run-core-tests.sh` without network | schema rules, validation, codec round-trip & determinism, migrations, store CRUD, conflicts, history, recovery, import/export security |
 | App unit tests | JUnit 4 + coroutines-test | `./gradlew :app:testDebugUnitTest` | ViewModel/form logic (e.g. `ConfigDraft`) |
 | Golden tests (Phase 3+) | JUnit + checked-in expected files | JVM | XML / Java / Gradle / Manifest generators byte-for-byte |
-| Sample projects (Phase 2+) | `samples/*.swai` | JVM + worker | regression: decode, migrate, validate, generate, (Phase 9) build |
+| Sample projects (Phase 2+) | `samples/*.buildit` | JVM + worker | regression: decode, migrate, validate, generate, (Phase 9) build |
 | Compose UI tests | `ui-test-junit4` | emulator / device | create → open → rename → export → import flows |
 | WebView bridge tests (Phase 4) | instrumented | device | message validation, workspace round-trip |
 | AI tests (Phase 6+) | recorded provider responses (no live calls in CI) | JVM | parsing, schema validation, repair loop, proposal → transaction |

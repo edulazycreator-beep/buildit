@@ -1,4 +1,4 @@
-# Sketchware AI — Architecture
+# Build It — Architecture
 
 _Last updated: Phase 1 (foundation)._
 
@@ -62,7 +62,7 @@ Dependency rule: `:core:*` modules never depend on Android or on `:feature:*`. F
 * **Optimistic locking**: `save()` requires `project.revision` to equal the stored revision, then writes `revision + 1`. Prevents two editors (e.g. designer and AI) from silently overwriting each other.
 * **Version history / recovery**: snapshots are the history; `restoreSnapshot` snapshots the current state first (restores are undoable). A corrupt `project.json` surfaces as `StoreException.Corrupt`; `recover()` sets the damaged file aside and restores the newest readable snapshot.
 * **Delete** renames the directory first, so a crash mid-delete never leaves a half-deleted project in the list.
-* **Export/Import**: `.swai` = zip with `sketchware-ai-export.json` manifest, `project.json` and user files (no history). Import is hardened: path normalization and canonical-path check (zip-slip), entry count / per-entry / total size limits, duplicate-entry rejection, format-version check, full model validation, and always a fresh project id. Extraction happens in a temp dir that is removed on any failure.
+* **Export/Import**: `.buildit` = zip with `buildit-export.json` manifest, `project.json` and user files (no history). Import is hardened: path normalization and canonical-path check (zip-slip), entry count / per-entry / total size limits, duplicate-entry rejection, format-version check, full model validation, and always a fresh project id. Extraction happens in a temp dir that is removed on any failure.
 
 Room is deliberately *not* the source of truth for projects: a project must be a portable folder for export, backup and the build worker. Room enters in later phases for indexes and caches (build history, AI conversation history, usage stats).
 

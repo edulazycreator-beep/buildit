@@ -13,7 +13,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SketchwareAI"
+rootProject.name = "BuildIt"
 include(":app")
 include(":core:model")
 include(":core:storage")

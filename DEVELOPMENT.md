@@ -50,7 +50,7 @@ ARCHITECTURE.md  ROADMAP.md  DEVELOPMENT.md
 * Field + project validation (package/SDK/version rules, unique ids and view ids, container rules, safe paths)
 * Deterministic JSON codec with forward-version protection and migration pipeline
 * Templates: Empty Activity, Hello World, Text and Button
-* Project store: create, load, save with optimistic locking, delete, duplicate (incl. files), recent ordering, version history (bounded snapshots) with restore, corruption detection and recovery, hardened `.swai` import/export
+* Project store: create, load, save with optimistic locking, delete, duplicate (incl. files), recent ordering, version history (bounded snapshots) with restore, corruption detection and recovery, hardened `.buildit` import/export
 * App: Dashboard, Project Manager (search, sort, rename, duplicate, export, import, delete, recover), Create Project (live validation, auto package from app name), Workspace shell (overview with view tree, project settings editor, history restore), Settings (theme, dynamic color, package prefix)
 
 * Visual Designer (View tab): real-view preview, palette with drag & drop, property inspector, hierarchy, XML view, screen management, undo/redo, autosave

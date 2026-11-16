@@ -1,8 +1,8 @@
-# Sketchware AI
+# Build It
 
-A native Android app builder in the spirit of Sketchware Pro — design screens visually, build logic with blocks — with AI built into every step.
+A native Android app builder that uses Sketchware Pro as a UX reference (no Sketchware code is used) — design screens visually, build logic with blocks — with AI built into every step.
 
-**Status:** Phase 1 (foundation). Project management works end-to-end on top of a versioned, validated project model. Designer, blocks, code generation, AI and builds follow in Phases 3–9. See [ROADMAP.md](ROADMAP.md).
+**Status:** project management and the visual designer (adaptive for phones, landscape and tablets) work on top of a versioned, validated project model. Logic blocks, code generation, on-device compile and AI follow. See [ROADMAP.md](ROADMAP.md).
 
 * [ARCHITECTURE.md](ARCHITECTURE.md) — modules, project model, persistence, planned subsystem designs
 * [docs/SPEC.md](docs/SPEC.md) — environment, data contracts, risks, testing strategy
