@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder launcher mark (rounded square + puzzle-block notch). Replace with final artwork in Phase 10. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#3D5AFE"
+        android:pathData="M24,14h60a10,10 0,0 1,10 10v60a10,10 0,0 1,-10 10h-60a10,10 0,0 1,-10 -10v-60a10,10 0,0 1,10 -10z" />
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M34,38h14v-4a6,6 0,0 1,12 0v4h14v14h-4a6,6 0,0 0,0 12h4v14h-40z" />
+</vector>

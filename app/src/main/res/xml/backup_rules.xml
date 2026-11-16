@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Projects are backed up. Settings DataStore is backed up. Secrets (Phase 6) live in a
+     separate encrypted file that must be excluded here when it is introduced. -->
+<full-backup-content>
+    <include domain="file" path="projects/" />
+    <include domain="file" path="datastore/" />
+</full-backup-content>
