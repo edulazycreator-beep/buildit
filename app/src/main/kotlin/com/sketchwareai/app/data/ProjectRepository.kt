@@ -52,6 +52,9 @@ class ProjectRepository @Inject constructor(
 
     suspend fun save(project: ProjectSchema): ProjectSchema = mutate { store.save(project) }
 
+    /** Plain load without touching "recently opened". */
+    suspend fun load(id: ProjectId): ProjectSchema = withContext(io) { store.load(id) }
+
     suspend fun updateConfig(project: ProjectSchema, config: ProjectConfig): ProjectSchema =
         mutate { store.save(factory.updateConfig(project, config)) }
 

@@ -16,6 +16,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Redo
+import androidx.compose.material.icons.automirrored.outlined.Undo
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
@@ -54,33 +56,58 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sketchwareai.app.ui.common.ConfirmDialog
 import com.sketchwareai.app.ui.common.relativeTime
 import com.sketchwareai.app.ui.create.SdkPicker
+import com.sketchwareai.app.ui.designer.DesignerPane
 import com.sketchwareai.core.model.ComponentSchema
 import com.sketchwareai.core.model.ProjectConfig
 import com.sketchwareai.core.model.ProjectSchema
 import com.sketchwareai.core.storage.ProjectSnapshot
 
-private enum class WorkspaceTab(val label: String) { OVERVIEW("Overview"), SETTINGS("Settings"), HISTORY("History") }
+private enum class WorkspaceTab(val label: String) { VIEW("View"), SETTINGS("Settings"), HISTORY("History") }
 
 /**
- * Project workspace shell. Phase 1 provides overview, project configuration and version
- * history. The Sketchware-style View / Event / Component editors join this screen in
- * Phases 3–4 as additional tabs over the same [ProjectSchema].
+ * Project workspace, Sketchware-style: the "View" tab is the visual designer. Settings and
+ * History manage the project itself. Logic (Event) and Component tabs arrive in later phases.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkspaceScreen(onBack: () -> Unit, vm: WorkspaceViewModel = hiltViewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
+    val ui by vm.ui.collectAsStateWithLifecycle()
+    val history by vm.history.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     var tab by rememberSaveable { mutableIntStateOf(0) }
-    LaunchedEffect(vm) { vm.messages.collect { snackbar.showSnackbar(it) } }
+    LaunchedEffect(vm) { vm.messages.collect { snackbar.currentSnackbarData?.dismiss(); snackbar.showSnackbar(it) } }
 
     val title = (state as? WorkspaceState.Loaded)?.project?.config?.appName ?: "Project"
     Scaffold(
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text(title) },
+                    title = {
+                        Column {
+                            Text(title, maxLines = 1)
+                            Text(
+                                when (ui.saveStatus) {
+                                    SaveStatus.SAVED -> "All changes saved"
+                                    SaveStatus.PENDING, SaveStatus.SAVING -> "Saving…"
+                                    SaveStatus.FAILED -> "Not saved"
+                                },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (ui.saveStatus == SaveStatus.FAILED) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    },
                     navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back") } },
+                    actions = {
+                        if (state is WorkspaceState.Loaded) {
+                            IconButton(onClick = vm::undo, enabled = ui.canUndo) {
+                                Icon(Icons.AutoMirrored.Outlined.Undo, contentDescription = ui.undoLabel?.let { "Undo $it" } ?: "Undo")
+                            }
+                            IconButton(onClick = vm::redo, enabled = ui.canRedo) {
+                                Icon(Icons.AutoMirrored.Outlined.Redo, contentDescription = ui.redoLabel?.let { "Redo $it" } ?: "Redo")
+                            }
+                        }
+                    },
                 )
                 if (state is WorkspaceState.Loaded) {
                     PrimaryTabRow(selectedTabIndex = tab) {
@@ -97,11 +124,11 @@ fun WorkspaceScreen(onBack: () -> Unit, vm: WorkspaceViewModel = hiltViewModel()
             when (val s = state) {
                 WorkspaceState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                 is WorkspaceState.Failed -> Centered(s.message)
-                is WorkspaceState.Damaged -> DamagedPane(s.snapshotCount, vm::recover)
+                is WorkspaceState.Damaged -> DamagedPane(s.snapshotCount) { vm.recover() }
                 is WorkspaceState.Loaded -> when (WorkspaceTab.entries[tab]) {
-                    WorkspaceTab.OVERVIEW -> OverviewPane(s.project)
+                    WorkspaceTab.VIEW -> DesignerPane(vm, s.project, ui)
                     WorkspaceTab.SETTINGS -> SettingsPane(vm)
-                    WorkspaceTab.HISTORY -> HistoryPane(s.project, s.history, vm::restore)
+                    WorkspaceTab.HISTORY -> HistoryPane(s.project, history) { vm.restore(it) }
                 }
             }
         }
@@ -139,53 +166,6 @@ private fun DamagedPane(snapshotCount: Int, onRecover: () -> Unit) {
         onConfirm = onRecover,
         onDismiss = { confirm = false },
     )
-}
-
-// ------------------------------------------------------------------------- overview
-
-@Composable
-private fun OverviewPane(project: ProjectSchema) {
-    val c = project.config
-    LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item {
-            ElevatedCard(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(c.appName, style = MaterialTheme.typography.titleLarge)
-                    Text(c.packageName, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(
-                        "Version ${c.versionName} (${c.versionCode}) · SDK ${c.minSdk}–${c.targetSdk} · ${c.language.name.lowercase().replaceFirstChar { it.uppercase() }}",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    Text("Revision ${project.revision} · saved ${relativeTime(project.updatedAt)}", style = MaterialTheme.typography.bodySmall)
-                }
-            }
-        }
-        item { Text("Screens", style = MaterialTheme.typography.titleSmall) }
-        items(project.screens, key = { it.id.value }) { screen ->
-            ElevatedCard(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(screen.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                        if (screen.id == c.mainScreenId) Text("MAIN", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-                    }
-                    Text("${screen.layoutName}.xml · ${screen.allComponents().size} views · ${screen.events.size} events",
-                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    HorizontalDivider(Modifier.padding(vertical = 8.dp))
-                    ComponentTree(screen.root, depth = 0)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ComponentTree(component: ComponentSchema, depth: Int) {
-    Text(
-        "  ".repeat(depth) + (if (depth > 0) "└ " else "") + "${component.type.xmlTag.substringAfterLast('.')}  #${component.viewId}",
-        style = MaterialTheme.typography.bodySmall,
-        fontFamily = FontFamily.Monospace,
-    )
-    component.children.forEach { ComponentTree(it, depth + 1) }
 }
 
 // ------------------------------------------------------------------------- settings
@@ -244,8 +224,8 @@ private fun HistoryPane(project: ProjectSchema, history: List<ProjectSnapshot>, 
     LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
         item {
             ListItem(
-                headlineContent = { Text("Revision ${project.revision} (current)") },
-                supportingContent = { Text("Saved ${relativeTime(project.updatedAt)}") },
+                headlineContent = { Text("Current version") },
+                supportingContent = { Text("What you see in the editor. Older versions are kept automatically.") },
             )
             HorizontalDivider()
         }

@@ -17,3 +17,4 @@ rootProject.name = "SketchwareAI"
 include(":app")
 include(":core:model")
 include(":core:storage")
+include(":core:codegen")

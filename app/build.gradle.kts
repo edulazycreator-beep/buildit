@@ -38,6 +38,7 @@ android {
 dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:storage"))
+    implementation(project(":core:codegen"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -50,6 +51,10 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.datastore.preferences)
+    // Real Android views for the designer preview.
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.cardview)
+    implementation(libs.androidx.recyclerview)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
 

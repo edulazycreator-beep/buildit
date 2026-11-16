@@ -1,5 +1,6 @@
 package com.sketchwareai.app.data
 
+import com.sketchwareai.core.model.EditException
 import com.sketchwareai.core.model.InvalidProjectException
 import com.sketchwareai.core.model.ProjectFormatException
 import com.sketchwareai.core.storage.StoreException
@@ -7,6 +8,7 @@ import java.io.IOException
 
 /** Converts failures into short, user-facing text. Never includes stack traces or paths. */
 fun Throwable.toUserMessage(): String = when (this) {
+    is EditException -> message ?: "That change is not allowed"
     is InvalidProjectException -> message ?: "The project is not valid"
     is StoreException.NotFound -> "That project no longer exists"
     is StoreException.Conflict -> "The project changed in the meantime. Reloaded the latest version."

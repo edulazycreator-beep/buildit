@@ -43,8 +43,10 @@ interface ProjectStore {
     /**
      * Saves [project] if the stored revision equals `project.revision` (optimistic locking).
      * Returns the saved project with `revision + 1` and an updated timestamp.
+     * The previous state is kept in history, subject to the store's snapshot interval
+     * unless [forceSnapshot] is set.
      */
-    fun save(project: ProjectSchema): ProjectSchema
+    fun save(project: ProjectSchema, forceSnapshot: Boolean = false): ProjectSchema
 
     /** Writes a brand-new project (revision 0). Fails if the id already exists. */
     fun create(project: ProjectSchema): ProjectSchema

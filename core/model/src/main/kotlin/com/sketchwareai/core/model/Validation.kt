@@ -122,6 +122,17 @@ object ProjectValidator {
                     if (comp.children.size > 1) error("component.scrollChildren", "A scroll view can host only one direct child", cp)
                 }
             }
+            fun checkProperties(comp: ComponentSchema, parentType: ComponentType?) {
+                val defs = PropertyCatalog.propertiesFor(comp.type, parentType).associateBy { it.key }
+                for ((key, value) in comp.properties) {
+                    val def = defs[key]
+                    val cp = "$sp.components[${comp.id}].properties.$key"
+                    if (def == null) warn("property.unknown", "${comp.viewId}: property \"$key\" is ignored here", cp)
+                    else def.validate(value)?.let { error("property.value", "${comp.viewId}: ${def.label}: $it", cp) }
+                }
+                comp.children.forEach { checkProperties(it, comp.type) }
+            }
+            checkProperties(screen.root, null)
             duplicates(components.map { it.viewId }).forEach { error("component.viewId.duplicate", "Duplicate view id \"$it\"", sp) }
 
             val componentIds = components.map { it.id }.toSet()

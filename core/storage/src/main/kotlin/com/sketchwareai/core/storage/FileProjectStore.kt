@@ -50,6 +50,8 @@ class FileProjectStore(
 
     data class Limits(
         val maxHistory: Int = 30,
+        /** Minimum time between automatic snapshots, so frequent autosaves don't flood history. */
+        val minSnapshotIntervalMillis: Long = 0,
         val maxArchiveEntries: Int = 5_000,
         val maxArchiveEntryBytes: Long = 64L * 1024 * 1024,
         val maxArchiveTotalBytes: Long = 256L * 1024 * 1024,
@@ -110,13 +112,16 @@ class FileProjectStore(
         fresh
     }
 
-    override fun save(project: ProjectSchema): ProjectSchema = lock.withLock {
+    override fun save(project: ProjectSchema, forceSnapshot: Boolean): ProjectSchema = lock.withLock {
         val current = load(project.id)
         if (current.revision != project.revision) {
             throw StoreException.Conflict(project.id, project.revision, current.revision)
         }
         val dir = dirOf(project.id)
-        snapshot(dir, current)
+        val newest = historyUnlocked(project.id).firstOrNull()
+        if (forceSnapshot || newest == null || clock() - newest.savedAt >= limits.minSnapshotIntervalMillis) {
+            snapshot(dir, current)
+        }
         val saved = project.copy(revision = current.revision + 1, updatedAt = maxOf(clock(), current.updatedAt))
         writeAtomically(File(dir, PROJECT_FILE), codec.encode(saved))
         saved
@@ -167,7 +172,7 @@ class FileProjectStore(
     override fun restoreSnapshot(id: ProjectId, revision: Long): ProjectSchema = lock.withLock {
         val current = load(id)
         val old = loadSnapshot(id, revision)
-        save(old.copy(id = id, revision = current.revision))
+        save(old.copy(id = id, revision = current.revision), forceSnapshot = true)
     }
 
     override fun recover(id: ProjectId): ProjectSchema = lock.withLock {

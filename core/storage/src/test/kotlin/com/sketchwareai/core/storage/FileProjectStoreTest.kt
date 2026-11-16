@@ -197,3 +197,25 @@ class FileProjectStoreTest {
         try { store.delete(ProjectId("prj_ok/../../x")); fail() } catch (_: IllegalArgumentException) {}
     }
 }
+
+class SnapshotThrottleTest {
+    @Test fun `autosaves are snapshotted at most once per interval but restores always are`() {
+        val root = Files.createTempDirectory("swai-throttle").toFile()
+        try {
+            var now = 0L
+            val store = FileProjectStore(root, clock = { now }, limits = FileProjectStore.Limits(minSnapshotIntervalMillis = 60_000))
+            val factory = ProjectFactory(RandomIdGenerator()) { now }
+            var p = store.create(factory.create(NewProjectRequest("App", "com.example.app")))
+            for (i in 1..10) { now += 1_000; p = store.save(factory.rename(p, "N$i")) }
+            assertEquals(listOf(0L), store.history(p.id).map { it.revision })
+            now += 60_000
+            p = store.save(factory.rename(p, "Later"))
+            assertEquals(listOf(10L, 0L), store.history(p.id).map { it.revision })
+            now += 1_000
+            store.restoreSnapshot(p.id, 0)
+            assertEquals(11L, store.history(p.id).first().revision)
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+}
