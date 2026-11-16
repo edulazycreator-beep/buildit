@@ -28,6 +28,7 @@ app/                       Android app (Compose, Hilt, Navigation)
     ui/                    theme, navigation, dashboard, projects, create, workspace, settings, common
 core/model/                project schemas, ids, validation, codec, migrations, templates (JVM)
 core/storage/              file-based ProjectStore with history, recovery, import/export (JVM)
+core/codegen/              generators: layout XML (more in Phase 5) (JVM)
 docs/SPEC.md               environment, data contracts, risks, testing strategy
 tools/run-core-tests.sh    offline core test runner
 ARCHITECTURE.md  ROADMAP.md  DEVELOPMENT.md
@@ -52,8 +53,11 @@ ARCHITECTURE.md  ROADMAP.md  DEVELOPMENT.md
 * Project store: create, load, save with optimistic locking, delete, duplicate (incl. files), recent ordering, version history (bounded snapshots) with restore, corruption detection and recovery, hardened `.swai` import/export
 * App: Dashboard, Project Manager (search, sort, rename, duplicate, export, import, delete, recover), Create Project (live validation, auto package from app name), Workspace shell (overview with view tree, project settings editor, history restore), Settings (theme, dynamic color, package prefix)
 
-### Not yet implemented (by design — later phases)
-Visual Designer, Logic editor (Blockly), Components/Resources editors, code generation, Code editor, AI Assistant / Builder / Visual Generator / Debugger, Build Manager, undo/redo for edits.
+* Visual Designer (View tab): real-view preview, palette with drag & drop, property inspector, hierarchy, XML view, screen management, undo/redo, autosave
+* Layout XML generator (`:core:codegen`) with golden tests
+
+### Not yet implemented (later phases)
+Logic editor (Blockly), Components/Resources editors, Java/Manifest/Gradle generation, Code editor, on-device compile, AI Assistant / Builder / Visual Generator / Debugger.
 
 ### Known gaps in Phase 1
 * `:app` is compiled and tested in GitHub Actions (`.github/workflows/android.yml`); the debug APK is a downloadable workflow artifact.
